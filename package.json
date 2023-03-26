@@ -1,0 +1,23 @@
+{
+  "name": "nft-api",
+  "version": "1.0.0",
+  "description": "This is a general API, then convert it into the NFT Marketplace API.",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "author": "sajid-rajput",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/node": "^18.15.7",
+    "typescript": "^5.0.2"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
