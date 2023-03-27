@@ -1,8 +1,10 @@
 import fs from "fs";
 import express from "express";
+import { fileURLToPath } from "url";
 import path, { dirname } from "path";
 import type { Express } from "express";
-import { fileURLToPath } from "url";
+import type { Request } from "express";
+import type { Response } from "express";
 
 const app: Express = express();
 app.use(express.json()); // <- Express Middleware ->
@@ -48,7 +50,7 @@ const nfts = JSON.parse(
   )
 );
 
-app.get("/api/v1/nfts", (req, resp) => {
+const getAllNFTs: (req: Request, resp: Response) => void = (req, resp) => {
   resp.status(200).json({
     status: "success",
     results: nfts.length,
@@ -56,7 +58,7 @@ app.get("/api/v1/nfts", (req, resp) => {
       nfts,
     },
   });
-});
+};
 
 //=========================================================================================
 
@@ -64,7 +66,7 @@ app.get("/api/v1/nfts", (req, resp) => {
 
 // <- POST REQUEST (Add the new NFT data) ->
 
-app.post("/api/v1/nfts", (req, resp) => {
+const createNFT: (req: Request, resp: Response) => void = (req, resp) => {
   const newId: number = nfts.length;
   const newNFT: NFT = Object.assign({ id: newId }, req.body);
 
@@ -89,7 +91,7 @@ app.post("/api/v1/nfts", (req, resp) => {
       });
     }
   );
-});
+};
 
 //=========================================================================================
 
@@ -97,7 +99,7 @@ app.post("/api/v1/nfts", (req, resp) => {
 
 // <- GET REQUEST (Get single NFT) ->
 
-app.get("/api/v1/nfts/:id", (req, resp) => {
+const getSingleNFT: (req: Request, resp: Response) => void = (req, resp) => {
   const id: number = +req.params.id;
   const nft: NFT = nfts.find((element: NFT) => element.id === id);
 
@@ -114,7 +116,7 @@ app.get("/api/v1/nfts/:id", (req, resp) => {
       },
     });
   }
-});
+};
 
 //=========================================================================================
 
@@ -122,7 +124,7 @@ app.get("/api/v1/nfts/:id", (req, resp) => {
 
 // <- UPDATE REQUEST ->
 
-app.patch("/api/v1/nfts/:id", (req, resp) => {
+const updateNFT: (req: Request, resp: Response) => void = (req, resp) => {
   if (+req.params.id >= nfts.length) {
     resp.status(404).json({
       status: "fail",
@@ -136,7 +138,7 @@ app.patch("/api/v1/nfts/:id", (req, resp) => {
       },
     });
   }
-});
+};
 
 //=========================================================================================
 
@@ -144,7 +146,7 @@ app.patch("/api/v1/nfts/:id", (req, resp) => {
 
 // <- DELETE REQUEST ->
 
-app.delete("/api/v1/nfts/:id", (req, resp) => {
+const deleteNFT: (req: Request, resp: Response) => void = (req, resp) => {
   if (+req.params.id >= nfts.length) {
     resp.status(404).json({
       status: "fail",
@@ -156,7 +158,27 @@ app.delete("/api/v1/nfts/:id", (req, resp) => {
       data: null,
     });
   }
-});
+};
+
+//=========================================================================================
+
+//=========================================================================================
+
+// <- API ROUTES ->
+
+// app.get("/api/v1/nfts", getAllNFTs);
+// app.post("/api/v1/nfts", createNFT);
+// app.get("/api/v1/nfts/:id", getSingleNFT);
+// app.patch("/api/v1/nfts/:id", updateNFT);
+// app.delete("/api/v1/nfts/:id", deleteNFT);
+
+app.route("/api/v1/nfts").get(getAllNFTs).post(createNFT);
+
+app
+  .route("/api/v1/nfts/:id")
+  .get(getSingleNFT)
+  .patch(updateNFT)
+  .delete(deleteNFT);
 
 //=========================================================================================
 
