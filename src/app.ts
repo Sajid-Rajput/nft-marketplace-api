@@ -1,4 +1,5 @@
 import fs from "fs";
+import morgan from "morgan";
 import express from "express";
 import { fileURLToPath } from "url";
 import path, { dirname } from "path";
@@ -7,13 +8,18 @@ import type { Request } from "express";
 import type { Response } from "express";
 
 const app: Express = express();
-app.use(express.json()); // <- Express Middleware ->
-
 const port: number = 3000;
 
 //=========================================================================================
+// <- EXPRESS MIDDLEWARE ->
+//=========================================================================================
 
+app.use(express.json()); // <- Express Middleware ->
+app.use(morgan("dev"));
+
+//=========================================================================================
 // <- CREATING DATA TYPES ->
+//=========================================================================================
 
 type NFT = {
   id: number;
@@ -31,11 +37,31 @@ type NFT = {
   startDates: string[];
 };
 
-//=========================================================================================
+declare global {
+  namespace Express {
+    interface Request {
+      requestTime?: string;
+    }
+  }
+}
 
 //=========================================================================================
+// <- BUILD CUSTOM EXPRESS MIDDLEWARES ->
+//=========================================================================================
 
+app.use((req, resp, next) => {
+  console.log(`Hello👋! I am from middleware function`);
+  next();
+});
+
+app.use((req, resp, next) => {
+  req.requestTime = new Date().toISOString();
+  next();
+});
+
+//=========================================================================================
 // <- GET REQUEST (Get all NFTs) ->
+//=========================================================================================
 
 const nfts = JSON.parse(
   fs.readFileSync(
@@ -53,6 +79,7 @@ const nfts = JSON.parse(
 const getAllNFTs: (req: Request, resp: Response) => void = (req, resp) => {
   resp.status(200).json({
     status: "success",
+    requestTime: req.requestTime,
     results: nfts.length,
     data: {
       nfts,
@@ -61,10 +88,8 @@ const getAllNFTs: (req: Request, resp: Response) => void = (req, resp) => {
 };
 
 //=========================================================================================
-
-//=========================================================================================
-
 // <- POST REQUEST (Add the new NFT data) ->
+//=========================================================================================
 
 const createNFT: (req: Request, resp: Response) => void = (req, resp) => {
   const newId: number = nfts.length;
@@ -94,10 +119,8 @@ const createNFT: (req: Request, resp: Response) => void = (req, resp) => {
 };
 
 //=========================================================================================
-
-//=========================================================================================
-
 // <- GET REQUEST (Get single NFT) ->
+//=========================================================================================
 
 const getSingleNFT: (req: Request, resp: Response) => void = (req, resp) => {
   const id: number = +req.params.id;
@@ -119,10 +142,8 @@ const getSingleNFT: (req: Request, resp: Response) => void = (req, resp) => {
 };
 
 //=========================================================================================
-
-//=========================================================================================
-
 // <- UPDATE REQUEST ->
+//=========================================================================================
 
 const updateNFT: (req: Request, resp: Response) => void = (req, resp) => {
   if (+req.params.id >= nfts.length) {
@@ -141,10 +162,8 @@ const updateNFT: (req: Request, resp: Response) => void = (req, resp) => {
 };
 
 //=========================================================================================
-
-//=========================================================================================
-
 // <- DELETE REQUEST ->
+//=========================================================================================
 
 const deleteNFT: (req: Request, resp: Response) => void = (req, resp) => {
   if (+req.params.id >= nfts.length) {
@@ -161,16 +180,8 @@ const deleteNFT: (req: Request, resp: Response) => void = (req, resp) => {
 };
 
 //=========================================================================================
-
-//=========================================================================================
-
 // <- API ROUTES ->
-
-// app.get("/api/v1/nfts", getAllNFTs);
-// app.post("/api/v1/nfts", createNFT);
-// app.get("/api/v1/nfts/:id", getSingleNFT);
-// app.patch("/api/v1/nfts/:id", updateNFT);
-// app.delete("/api/v1/nfts/:id", deleteNFT);
+//=========================================================================================
 
 app.route("/api/v1/nfts").get(getAllNFTs).post(createNFT);
 
@@ -181,10 +192,8 @@ app
   .delete(deleteNFT);
 
 //=========================================================================================
-
-//=========================================================================================
-
 // <- CREATE SERVER ->
+//=========================================================================================
 
 app.listen(port, () => {
   console.log(`App running on port ${port}....`);
