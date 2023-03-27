@@ -1,5 +1,8 @@
 import morgan from "morgan";
 import express from "express";
+import path from "path";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
 import nftsRouter from "./routes/nftsRoute.js";
 import usersRouter from "./routes/usersRoute.js";
 import type { Express } from "express";
@@ -11,7 +14,20 @@ const app: Express = express();
 //=========================================================================================
 
 app.use(express.json()); // <- Express Middleware ->
-app.use(morgan("dev"));
+
+if(process.env.NODE_ENV === "development"){
+  app.use(morgan("dev"));
+}
+
+//=========================================================================================
+// <- SERVING TEMPLATE DEMO ->
+//=========================================================================================
+
+app.use(
+  express.static(
+    path.join(dirname(fileURLToPath(import.meta.url)), "..", "nft-data", "img")
+  )
+);
 
 //=========================================================================================
 // <- BUILD CUSTOM EXPRESS MIDDLEWARES ->
