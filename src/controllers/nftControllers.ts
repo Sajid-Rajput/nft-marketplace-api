@@ -1,8 +1,7 @@
 import fs from "fs";
 import { fileURLToPath } from "url";
 import path, { dirname } from "path";
-import type { Request } from "express";
-import type { Response } from "express";
+import type { Request, Response, NextFunction } from "express";
 
 //=========================================================================================
 // <- CREATING DATA TYPES ->
@@ -31,6 +30,45 @@ declare global {
     }
   }
 }
+
+//=========================================================================================
+// <- EXPRESS CUSTOM MIDDLEWARE (CHECK FUNCTIONS) ->
+//=========================================================================================
+
+// <- *** CHECK NFT ID *** ->
+
+const checkID: (
+  req: Request,
+  resp: Response,
+  next: NextFunction,
+  value: number
+) => Response | undefined = (req, resp, next, value) => {
+  console.log(`ID: ${value}`);
+  if (+req.params.id >= nfts.length) {
+    return resp.status(404).json({
+      status: "fail",
+      message: "Invalid ID",
+    });
+  }
+  next();
+};
+
+// <- *** CHECK REQUEST BODY DURING POSTING THE NFT *** ->
+
+const checkBody: (
+  req: Request,
+  resp: Response,
+  next: NextFunction
+) => Response | undefined = (req, resp, next) => {
+  if (!req.body.name || !req.body.price) {
+    return resp.status(400).json({
+      status: "fail",
+      message: "Missing name or price",
+    });
+  }
+
+  next();
+};
 
 // ********************************  NFT ENDPOINTS *******************************************
 
@@ -107,19 +145,12 @@ const getSingleNFT: (req: Request, resp: Response) => void = (req, resp) => {
   const id: number = +req.params.id;
   const nft: NFT | undefined = nfts.find((element: NFT) => element.id === id);
 
-  if (!nft) {
-    resp.status(404).json({
-      status: "fail",
-      message: "Invalid ID",
-    });
-  } else {
-    resp.status(200).json({
-      status: "success",
-      data: {
-        nft,
-      },
-    });
-  }
+  resp.status(200).json({
+    status: "success",
+    data: {
+      nft,
+    },
+  });
 };
 
 //=========================================================================================
@@ -127,19 +158,12 @@ const getSingleNFT: (req: Request, resp: Response) => void = (req, resp) => {
 //=========================================================================================
 
 const updateNFT: (req: Request, resp: Response) => void = (req, resp) => {
-  if (+req.params.id >= nfts.length) {
-    resp.status(404).json({
-      status: "fail",
-      message: "Invalid ID",
-    });
-  } else {
-    resp.status(200).json({
-      status: "success",
-      data: {
-        nft: "Updating NFT",
-      },
-    });
-  }
+  resp.status(200).json({
+    status: "success",
+    data: {
+      nft: "Updating NFT",
+    },
+  });
 };
 
 //=========================================================================================
@@ -147,17 +171,10 @@ const updateNFT: (req: Request, resp: Response) => void = (req, resp) => {
 //=========================================================================================
 
 const deleteNFT: (req: Request, resp: Response) => void = (req, resp) => {
-  if (+req.params.id >= nfts.length) {
-    resp.status(404).json({
-      status: "fail",
-      message: "Invalid ID",
-    });
-  } else {
-    resp.status(204).json({
-      status: "success",
-      data: null,
-    });
-  }
+  resp.status(204).json({
+    status: "success",
+    data: null,
+  });
 };
 
 // ********************************* NFT ENDPOINTS *******************************************
@@ -166,4 +183,12 @@ const deleteNFT: (req: Request, resp: Response) => void = (req, resp) => {
 // <- EXPORTS ->
 //=========================================================================================
 
-export default { getAllNFTs, createNFT, getSingleNFT, updateNFT, deleteNFT };
+export default {
+  getAllNFTs,
+  createNFT,
+  getSingleNFT,
+  updateNFT,
+  deleteNFT,
+  checkID,
+  checkBody
+};
