@@ -1,5 +1,6 @@
 import path from "path";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import app from "./app.js";
@@ -11,8 +12,26 @@ import app from "./app.js";
 dotenv.config({
   path: path.join(dirname(fileURLToPath(import.meta.url)), "..", "config.env"),
 });
-// console.log(app.get("env"));
-// console.log(process.env);
+
+//=========================================================================================
+// <- CONNECTING WITH THE MONGODB DATABASE ->
+//=========================================================================================
+
+if (process.env.DATABASE && process.env.DATABASE_PASSWORD) {
+  const DB: string = process.env.DATABASE.replace(
+    "<PASSWORD>",
+    process.env.DATABASE_PASSWORD
+  );
+
+  mongoose.connect(DB, {
+    useCreateIndex: true,
+    useFindAndModify: false,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }).then(() => {
+    console.log("DB Connected Successfully");
+  });
+}
 
 //=========================================================================================
 // <- CREATE SERVER ->
