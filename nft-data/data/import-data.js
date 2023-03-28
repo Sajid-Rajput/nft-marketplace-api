@@ -1,9 +1,20 @@
-const fs = require("fs");
-const dotenv = require("dotenv");
-const mongoose = require("mongoose");
-const NFT = require("./../../models/nftModel");
+import fs from "fs";
+import path from "path";
+import dotenv from "dotenv";
+import { dirname } from "path";
+import mongoose from "mongoose";
+import { fileURLToPath } from "url";
+import NFT from "./../../lib/models/nftModel.js";
 
-dotenv.config({ path: "./config.env" });
+dotenv.config({
+  path: path.join(
+    dirname(fileURLToPath(import.meta.url)),
+    "..",
+    "..",
+    "config.env"
+  ),
+});
+
 const DB = process.env.DATABASE.replace(
   "<PASSWORD>",
   process.env.DATABASE_PASSWORD
@@ -14,32 +25,35 @@ mongoose
     useCreateIndex: true,
     useFindAndModify: false,
     useNewUrlParser: true,
+    useUnifiedTopology: true,
   })
   .then((con) => {
-    // console.log(con.connection);
-    console.log("DB Connection Successfully");
+    console.log("DATABASE CONNECTED SUCCESSFULLY");
   });
 
 const nfts = JSON.parse(
-  fs.readFileSync(`${__dirname}/nft-simple.json`, "utf-8")
+  fs.readFileSync(
+    path.join(dirname(fileURLToPath(import.meta.url)), "nft-simple.json"),
+    "utf-8"
+  )
 );
 
-//IMPORT DATA
-const importDate = async () => {
+// IMPORT DATA
+const importData = async () => {
   try {
     await NFT.create(nfts);
-    console.log("DATA successfully Loaded");
+    console.log("DATA SUCCESSFULLY LOADED!!!");
     process.exit();
   } catch (error) {
     console.log(error);
   }
 };
 
-//DELETE DATA
+// DELETE DATA
 const deleteData = async () => {
   try {
     await NFT.deleteMany();
-    console.log("DATA successfully Deleted");
+    console.log("ALL DATA DELETED SUCCESSFULLY!!!");
     process.exit();
   } catch (error) {
     console.log(error);
@@ -47,7 +61,7 @@ const deleteData = async () => {
 };
 
 if (process.argv[2] === "--import") {
-  importDate();
+  importData();
 } else if (process.argv[2] === "--delete") {
   deleteData();
 }
