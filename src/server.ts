@@ -23,14 +23,16 @@ if (process.env.DATABASE && process.env.DATABASE_PASSWORD) {
     process.env.DATABASE_PASSWORD
   );
 
-  mongoose.connect(DB, {
-    useCreateIndex: true,
-    useFindAndModify: false,
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }).then(() => {
-    console.log("DB Connected Successfully");
-  });
+  mongoose
+    .connect(DB, {
+      useCreateIndex: true,
+      useFindAndModify: false,
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    })
+    .then(() => {
+      console.log("DB Connected Successfully");
+    });
 }
 
 //=========================================================================================
