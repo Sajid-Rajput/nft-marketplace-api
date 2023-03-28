@@ -9,15 +9,12 @@ import nftControllers from "../controllers/nftControllers.js";
 // *** EXPRESS ROUTER ***
 const router: Router = express.Router();
 
-// *** CREATE EXPRESS CUSTOM MIDDLEWARE ***
-router.param("id", nftControllers.checkID);
-
 // *** NFT API ROUTES ***
 
 router
   .route("/")
   .get(nftControllers.getAllNFTs)
-  .post(nftControllers.checkBody, nftControllers.createNFT);
+  .post(nftControllers.createNFT);
 
 router
   .route("/:id")
