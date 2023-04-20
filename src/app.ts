@@ -15,7 +15,7 @@ const app: Express = express();
 
 app.use(express.json()); // <- Express Middleware ->
 
-if(process.env.NODE_ENV === "development"){
+if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
@@ -38,10 +38,20 @@ app.use((req, resp, next) => {
   next();
 });
 
-app.use((req, resp, next) => {
-  req.requestTime = new Date().toISOString();
-  next();
-});
+// <- ADDING REQUEST TIME PARAMETER IN EXPRESS ->
+
+// declare global {
+//   namespace Express {
+//     interface Request {
+//       requestTime?: string;
+//     }
+//   }
+// }
+
+// app.use((req, resp, next) => {
+//   req.requestTime = new Date().toISOString();
+//   next();
+// });
 
 //=========================================================================================
 // <- API ROUTES ->

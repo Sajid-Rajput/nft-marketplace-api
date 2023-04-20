@@ -10,11 +10,11 @@ import nftControllers from "../controllers/nftControllers.js";
 const router: Router = express.Router();
 
 // *** NFT API ROUTES ***
-
 router
-  .route("/")
-  .get(nftControllers.getAllNFTs)
-  .post(nftControllers.createNFT);
+  .route("/top-5-nfts")
+  .get(nftControllers.aliasTopNFTs, nftControllers.getAllNFTs);
+
+router.route("/").get(nftControllers.getAllNFTs).post(nftControllers.createNFT);
 
 router
   .route("/:id")

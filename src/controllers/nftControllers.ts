@@ -1,36 +1,43 @@
 import NFT from "../models/nftModel.js";
-import type { Request, Response } from "express";
-import { match } from "assert";
+import APIFeatures from "../Utils/apiFeatures.js";
+import { Request, Response, NextFunction } from "express";
 
 //=========================================================================================
 // <- CREATING DATA TYPES ->
 //=========================================================================================
 
-type NFT = {
-  id: number;
-  name: string;
-  duration: number;
-  maxGroupSize: number;
-  difficulty: string;
-  ratingsAverage: number;
-  ratingsQuantity: number;
-  price: number;
-  summary: string;
-  description: string;
-  imageCover: string;
-  images: string[];
-  startDates: string[];
+// type NFT = {
+//   id: number;
+//   name: string;
+//   duration: number;
+//   maxGroupSize: number;
+//   difficulty: string;
+//   ratingsAverage: number;
+//   ratingsQuantity: number;
+//   price: number;
+//   summary: string;
+//   description: string;
+//   imageCover: string;
+//   images: string[];
+//   startDates: string[];
+// };
+
+// ********************************  NFT ENDPOINTS ****************************************
+
+//=========================================================================================
+// <- GET REQUEST (Get top 5 NFTs) ->
+//=========================================================================================
+
+const aliasTopNFTs: (
+  req: Request,
+  resp: Response,
+  next: NextFunction
+) => void = (req, resp, next) => {
+  req.query.limit = "5";
+  req.query.sort = "-ratingsAverage, price";
+  req.query.fields = "name,price,ratingAverage,difficulty";
+  next();
 };
-
-declare global {
-  namespace Express {
-    interface Request {
-      requestTime?: string;
-    }
-  }
-}
-
-// ********************************  NFT ENDPOINTS *******************************************
 
 //=========================================================================================
 // <- GET REQUEST (Get all NFTs) ->
@@ -41,19 +48,12 @@ const getAllNFTs: (req: Request, resp: Response) => void = async (
   resp
 ) => {
   try {
-    const queryObj = { ...req.query };
-    const excludeFields: string[] = ["page", "sort", "limit", "fields"];
-    excludeFields.forEach((element) => delete queryObj[element]);
-
-    // ADVANCED FILTERING QUERY
-    // { difficulty: 'easy', duration: { gte: '5' } } REQUEST.QUERY
-    // { difficulty: 'easy', duration: { $gte: '5' } } VALID MONGODB QUERY
-
-    let queryStr: string = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-
-    const query = NFT.find(JSON.parse(queryStr));
-    const nfts = await query;
+    const features: APIFeatures = new APIFeatures(NFT.find(), req.query)
+      .filter()
+      .sort()
+      .limitfields()
+      .pagination();
+    const nfts = await features["query"];
 
     resp.status(200).json({
       status: "success",
@@ -161,7 +161,7 @@ const deleteNFT: (req: Request, resp: Response) => void = async (req, resp) => {
   }
 };
 
-// ********************************* NFT ENDPOINTS *******************************************
+// ********************************* NFT ENDPOINTS ****************************************
 
 //=========================================================================================
 // <- EXPORTS ->
@@ -173,4 +173,5 @@ export default {
   getSingleNFT,
   updateNFT,
   deleteNFT,
+  aliasTopNFTs,
 };
