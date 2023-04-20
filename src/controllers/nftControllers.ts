@@ -170,6 +170,7 @@ const getNftsStats: (req: Request, resp: Response) => void = async (
   resp
 ) => {
   try {
+    // Mongoose Aggregator Pipeline
     const stats = await NFT.aggregate([
       {
         $match: { ratingsAverage: { $gte: 4.5 } },
