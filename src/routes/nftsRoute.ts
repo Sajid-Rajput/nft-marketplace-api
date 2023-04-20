@@ -14,6 +14,8 @@ router
   .route("/top-5-nfts")
   .get(nftControllers.aliasTopNFTs, nftControllers.getAllNFTs);
 
+router.route("/nfts-stats").get(nftControllers.getNftsStats);
+
 router.route("/").get(nftControllers.getAllNFTs).post(nftControllers.createNFT);
 
 router

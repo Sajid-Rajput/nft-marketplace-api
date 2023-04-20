@@ -161,6 +161,54 @@ const deleteNFT: (req: Request, resp: Response) => void = async (req, resp) => {
   }
 };
 
+//=========================================================================================
+// <- GET REQUEST (NFT Stats) ->
+//=========================================================================================
+
+const getNftsStats: (req: Request, resp: Response) => void = async (
+  req,
+  resp
+) => {
+  try {
+    const stats = await NFT.aggregate([
+      {
+        $match: { ratingsAverage: { $gte: 4.5 } },
+      },
+      {
+        $group: {
+          _id: "$difficulty",
+          numNFT: { $sum: 1 },
+          numRatings: { $sum: "$ratingsQuantity" },
+          avgRating: { $avg: "$ratingsAverage" },
+          avgPrice: { $avg: "$price" },
+          minPrice: { $min: "$price" },
+          maxPrice: { $max: "$price" },
+        },
+      },
+      {
+        $sort: { avgRating: 1 },
+      },
+      {
+        $match: {
+          _id: { $ne: "easy" },
+        },
+      },
+    ]);
+
+    resp.status(200).json({
+      status: "success",
+      data: {
+        stats,
+      },
+    });
+  } catch (error) {
+    resp.status(500).json({
+      status: "fail",
+      message: "server error",
+    });
+  }
+};
+
 // ********************************* NFT ENDPOINTS ****************************************
 
 //=========================================================================================
@@ -174,4 +222,5 @@ export default {
   updateNFT,
   deleteNFT,
   aliasTopNFTs,
+  getNftsStats,
 };
