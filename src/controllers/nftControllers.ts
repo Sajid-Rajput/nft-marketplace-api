@@ -170,7 +170,7 @@ const getNftsStats: (req: Request, resp: Response) => void = async (
   resp
 ) => {
   try {
-    // Mongoose Aggregator Pipeline
+    // *** Mongoose Aggregator Pipeline ***
     const stats = await NFT.aggregate([
       {
         $match: { ratingsAverage: { $gte: 4.5 } },
@@ -210,6 +210,68 @@ const getNftsStats: (req: Request, resp: Response) => void = async (
   }
 };
 
+//=========================================================================================
+// <- GET REQUEST (Monthly Plan) ->
+//=========================================================================================
+
+// *** CALCULATING NUMBER OF NFT CREATE IN THE MONTH OR MONTHLY PLAN ***
+
+const getMonthlyPlan: (req: Request, resp: Response) => void = async (
+  req,
+  resp
+) => {
+  try {
+    const year: number = +req.params.year;
+    const plan = await NFT.aggregate([
+      {
+        $unwind: "$startDates",
+      },
+      {
+        $match: {
+          startDates: {
+            $gte: new Date(`${year}-01-01`),
+            $lte: new Date(`${year}-12-31`),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: "$startDates" },
+          numNFTStarts: { $sum: 1 },
+          nfts: { $push: "$name" },
+        },
+      },
+      {
+        $addFields: {
+          month: "$_id",
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+        },
+      },
+      {
+        $sort: {
+          numNFTStarts: -1,
+        },
+      },
+      {
+        $limit: 10,
+      },
+    ]);
+    resp.status(200).json({
+      status: "success",
+      data: plan,
+    });
+  } catch (error) {
+    resp.status(500).json({
+      status: "fail",
+      message: "server error",
+    });
+  }
+};
+
 // ********************************* NFT ENDPOINTS ****************************************
 
 //=========================================================================================
@@ -224,4 +286,5 @@ export default {
   deleteNFT,
   aliasTopNFTs,
   getNftsStats,
+  getMonthlyPlan,
 };
