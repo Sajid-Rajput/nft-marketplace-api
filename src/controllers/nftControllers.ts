@@ -87,7 +87,7 @@ const createNFT: (req: Request, resp: Response) => void = async (req, resp) => {
   } catch (error) {
     resp.status(400).json({
       status: "fail",
-      message: "INVALID DATA send for NFT",
+      message: error,
     });
   }
 };
@@ -101,7 +101,9 @@ const getSingleNFT: (req: Request, resp: Response) => void = async (
   resp
 ) => {
   try {
-    const nft = await NFT.findById(req.params.id);
+    const nft = await NFT.findById(req.params.id, {
+      runValidators: true,
+    });
 
     resp.status(200).json({
       status: "success",
