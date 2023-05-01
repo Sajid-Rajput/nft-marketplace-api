@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Model } from "mongoose";
 import slugify from "../Utils/slugify.js";
 //=========================================================================================
 // <- CREATE NFT MODEL MONGOOSE SCHEMA ->
@@ -58,9 +58,14 @@ const nftSchema = new mongoose.Schema(
       select: false,
     },
     startDates: [Date],
+    secretNFTs: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
@@ -76,6 +81,15 @@ nftSchema
 
 nftSchema.pre("save", function (this: { name: string; slug: string }, next) {
   this.slug = slugify(this.name, { lower: true });
+  next();
+});
+
+//=========================================================================================
+// <- QUERY MIDDLEWARE ->
+//=========================================================================================
+
+nftSchema.pre<mongoose.Query<any, any>>(/^find/, function (next) {
+  this.find({ secretNFTs: { $ne: true } });
   next();
 });
 
