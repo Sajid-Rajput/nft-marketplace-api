@@ -243,12 +243,14 @@ const getMonthlyPlan: (req: Request, resp: Response) => void = async (
       },
       {
         $addFields: {
+          // just add the new field and its value is equal to id
           month: "$_id",
         },
       },
       {
+        // $project is used to hide the _id field
         $project: {
-          _id: 1,
+          _id: 0,
         },
       },
       {
