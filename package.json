@@ -8,7 +8,8 @@
   },
   "scripts": {
     "start": "nodemon .\\lib\\server.js",
-    "start:prod": "SET NODE_ENV=production & nodemon .\\lib\\server.js"
+    "start:prod": "SET NODE_ENV=production & nodemon .\\lib\\server.js",
+    "debug": "ndb .\\lib\\server.js"
   },
   "type": "module",
   "author": "sajid-rajput",
@@ -27,6 +28,7 @@
     "express": "^4.18.2",
     "mongoose": "^5.5.2",
     "morgan": "^1.10.0",
+    "ndb": "^1.1.5",
     "slugify": "^1.6.6",
     "validator": "^13.9.0"
   }
