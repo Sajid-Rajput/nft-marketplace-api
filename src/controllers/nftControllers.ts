@@ -177,7 +177,7 @@ const getNftsStats: (req: Request, resp: Response) => void = async (
       },
       {
         $group: {
-          _id: "$difficulty",
+          _id: { $toUpper: "$difficulty" },
           numNFT: { $sum: 1 },
           numRatings: { $sum: "$ratingsQuantity" },
           avgRating: { $avg: "$ratingsAverage" },
@@ -191,7 +191,7 @@ const getNftsStats: (req: Request, resp: Response) => void = async (
       },
       {
         $match: {
-          _id: { $ne: "easy" },
+          _id: { $ne: "EASY" },
         },
       },
     ]);

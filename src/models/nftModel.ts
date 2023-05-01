@@ -93,6 +93,14 @@ nftSchema.pre<mongoose.Query<any, any>>(/^find/, function (next) {
   next();
 });
 
+//=========================================================================================
+// <- AGGREGATION MIDDLEWARE ->
+//=========================================================================================
+nftSchema.pre<mongoose.Aggregate<any>>("aggregate", function (next) {
+  this.pipeline().unshift({ $match: { secretNFTs: { $ne: true } } });
+  next();
+});
+
 const NFT = mongoose.model("NFT", nftSchema);
 
 //=========================================================================================
