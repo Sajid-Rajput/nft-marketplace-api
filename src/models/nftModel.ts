@@ -1,5 +1,6 @@
 import mongoose, { Model } from "mongoose";
 import slugify from "../Utils/slugify.js";
+import validator from "validator";
 //=========================================================================================
 // <- CREATE NFT MODEL MONGOOSE SCHEMA ->
 //=========================================================================================
