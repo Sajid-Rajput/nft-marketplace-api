@@ -1,6 +1,25 @@
 import mongoose, { Model } from "mongoose";
 import slugify from "../Utils/slugify.js";
 import validator from "validator";
+
+//=========================================================================================
+// <- QUERY EXECUTION TIME CALCULATION FUNCTION
+//=========================================================================================
+
+class QUERY_EXECUTION {
+  private static startTime: number;
+
+  set startTime(_startTime: number) {
+    QUERY_EXECUTION.startTime = _startTime;
+  }
+
+  static queryExecutionTIme() {
+    console.log(
+      `Query took ${Date.now() - QUERY_EXECUTION.startTime} milliseconds.`
+    );
+  }
+}
+
 //=========================================================================================
 // <- CREATE NFT MODEL MONGOOSE SCHEMA ->
 //=========================================================================================
@@ -107,6 +126,17 @@ nftSchema.pre("save", function (this: { name: string; slug: string }, next) {
 
 nftSchema.pre<mongoose.Query<any, any>>(/^find/, function (next) {
   this.find({ secretNFTs: { $ne: true } });
+  const queryStart = new QUERY_EXECUTION();
+  queryStart.startTime = Date.now();
+  next();
+});
+
+//=========================================================================================
+// <- POST MIDDLEWARE ->
+//=========================================================================================
+
+nftSchema.post<mongoose.Query<any, any>>(/^find/, function (docs, next) {
+  QUERY_EXECUTION.queryExecutionTIme();
   next();
 });
 
