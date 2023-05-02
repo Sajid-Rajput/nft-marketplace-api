@@ -19,3 +19,11 @@ Mongoose allows developers to define schemas for their data models, including da
 7. The regular expression /\b(gte|gt|lte|lt)\b/g is used to find and capture the keywords "gte", "gt", "lte", and "lt" in the JSON string. These keywords are commonly used as query parameters in MongoDB to specify greater-than, greater-than-or-equal-to, less-than, and less-than-or-equal-to conditions.
 
 The replace() method is then used to replace each captured keyword with its MongoDB equivalent, which is the same keyword preceded by a "$" sign. The callback function takes the matched keyword as an argument and returns the modified string.
+
+8. The catchAsync function takes a single argument, myFunc, which is of type T. The T type parameter is a generic type that extends a function that takes any number of arguments and returns a Promise that resolves to any value. The use of a generic type here allows you to specify the function signature of myFunc dynamically, based on the type of function that is passed in.
+
+The catchAsync function returns a new function that takes three arguments: req, resp, and next, which are objects representing an HTTP request, response, and next middleware function, respectively. This returned function then calls myFunc with these three arguments and returns the resulting Promise.
+
+If the Promise returned by myFunc is rejected, the catch method is called with next as its argument. next is a function that invokes the next middleware function in the application's middleware stack. By passing next to catch, any errors thrown in the Promise chain will be passed down to the error-handling middleware, allowing for centralized error handling.
+
+In summary, the catchAsync function is a utility function that takes a function that returns a Promise and returns a new function that handles errors in that Promise by passing them down to the error-handling middleware.

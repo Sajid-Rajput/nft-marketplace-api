@@ -1,4 +1,5 @@
 import NFT from "../models/nftModel.js";
+import catchAsync from "../Utils/catchAsync.js";
 import APIFeatures from "../Utils/apiFeatures.js";
 import { Request, Response, NextFunction } from "express";
 
@@ -43,11 +44,8 @@ const aliasTopNFTs: (
 // <- GET REQUEST (Get all NFTs) ->
 //=========================================================================================
 
-const getAllNFTs: (req: Request, resp: Response) => void = async (
-  req,
-  resp
-) => {
-  try {
+const getAllNFTs: (req: Request, resp: Response, next: NextFunction) => void =
+  catchAsync(async (req, resp) => {
     const features: APIFeatures = new APIFeatures(NFT.find(), req.query)
       .filter()
       .sort()
@@ -62,20 +60,14 @@ const getAllNFTs: (req: Request, resp: Response) => void = async (
         nfts,
       },
     });
-  } catch (error) {
-    resp.status(500).json({
-      status: "fail",
-      message: "server error",
-    });
-  }
-};
+  });
 
 //=========================================================================================
 // <- POST REQUEST (Add the new NFT data) ->
 //=========================================================================================
 
-const createNFT: (req: Request, resp: Response) => void = async (req, resp) => {
-  try {
+const createNFT: (req: Request, resp: Response, next: NextFunction) => void =
+  catchAsync(async (req, resp) => {
     const newNFT = await NFT.create(req.body);
 
     resp.status(201).json({
@@ -84,26 +76,15 @@ const createNFT: (req: Request, resp: Response) => void = async (req, resp) => {
         nft: newNFT,
       },
     });
-  } catch (error) {
-    resp.status(400).json({
-      status: "fail",
-      message: error,
-    });
-  }
-};
+  });
 
 //=========================================================================================
 // <- GET REQUEST (Get single NFT) ->
 //=========================================================================================
 
-const getSingleNFT: (req: Request, resp: Response) => void = async (
-  req,
-  resp
-) => {
-  try {
-    const nft = await NFT.findById(req.params.id, {
-      runValidators: true,
-    });
+const getSingleNFT: (req: Request, resp: Response, next: NextFunction) => void =
+  catchAsync(async (req, resp) => {
+    const nft = await NFT.findById(req.params.id);
 
     resp.status(200).json({
       status: "success",
@@ -111,20 +92,14 @@ const getSingleNFT: (req: Request, resp: Response) => void = async (
         nft,
       },
     });
-  } catch (error) {
-    resp.status(500).json({
-      status: "fail",
-      message: "server error",
-    });
-  }
-};
+  });
 
 //=========================================================================================
 // <- UPDATE REQUEST ->
 //=========================================================================================
 
-const updateNFT: (req: Request, resp: Response) => void = async (req, resp) => {
-  try {
+const updateNFT: (req: Request, resp: Response, next: NextFunction) => void =
+  catchAsync(async (req, resp) => {
     const nft = await NFT.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
@@ -135,43 +110,28 @@ const updateNFT: (req: Request, resp: Response) => void = async (req, resp) => {
         nft,
       },
     });
-  } catch (error) {
-    resp.status(500).json({
-      status: "fail",
-      message: "server error",
-    });
-  }
-};
+  });
 
 //=========================================================================================
 // <- DELETE REQUEST ->
 //=========================================================================================
 
-const deleteNFT: (req: Request, resp: Response) => void = async (req, resp) => {
-  try {
+const deleteNFT: (req: Request, resp: Response, next: NextFunction) => void =
+  catchAsync(async (req, resp) => {
     await NFT.findByIdAndDelete(req.params.id);
     console.log(typeof req.params.id);
     resp.status(204).json({
       status: "success",
       data: null,
     });
-  } catch (error) {
-    resp.status(500).json({
-      status: "fail",
-      message: "server error",
-    });
-  }
-};
+  });
 
 //=========================================================================================
 // <- GET REQUEST (NFT Stats) ->
 //=========================================================================================
 
-const getNftsStats: (req: Request, resp: Response) => void = async (
-  req,
-  resp
-) => {
-  try {
+const getNftsStats: (req: Request, resp: Response, next: NextFunction) => void =
+  catchAsync(async (req, resp) => {
     // *** Mongoose Aggregator Pipeline ***
     const stats = await NFT.aggregate([
       {
@@ -204,13 +164,7 @@ const getNftsStats: (req: Request, resp: Response) => void = async (
         stats,
       },
     });
-  } catch (error) {
-    resp.status(500).json({
-      status: "fail",
-      message: "server error",
-    });
-  }
-};
+  });
 
 //=========================================================================================
 // <- GET REQUEST (Monthly Plan) ->
@@ -218,63 +172,57 @@ const getNftsStats: (req: Request, resp: Response) => void = async (
 
 // *** CALCULATING NUMBER OF NFT CREATE IN THE MONTH OR MONTHLY PLAN ***
 
-const getMonthlyPlan: (req: Request, resp: Response) => void = async (
-  req,
-  resp
-) => {
-  try {
-    const year: number = +req.params.year;
-    const plan = await NFT.aggregate([
-      {
-        $unwind: "$startDates",
-      },
-      {
-        $match: {
-          startDates: {
-            $gte: new Date(`${year}-01-01`),
-            $lte: new Date(`${year}-12-31`),
-          },
+const getMonthlyPlan: (
+  req: Request,
+  resp: Response,
+  next: NextFunction
+) => void = catchAsync(async (req, resp) => {
+  const year: number = +req.params.year;
+  const plan = await NFT.aggregate([
+    {
+      $unwind: "$startDates",
+    },
+    {
+      $match: {
+        startDates: {
+          $gte: new Date(`${year}-01-01`),
+          $lte: new Date(`${year}-12-31`),
         },
       },
-      {
-        $group: {
-          _id: { $month: "$startDates" },
-          numNFTStarts: { $sum: 1 },
-          nfts: { $push: "$name" },
-        },
+    },
+    {
+      $group: {
+        _id: { $month: "$startDates" },
+        numNFTStarts: { $sum: 1 },
+        nfts: { $push: "$name" },
       },
-      {
-        $addFields: {
-          // just add the new field and its value is equal to id
-          month: "$_id",
-        },
+    },
+    {
+      $addFields: {
+        // just add the new field and its value is equal to id
+        month: "$_id",
       },
-      {
-        // $project is used to hide the _id field
-        $project: {
-          _id: 0,
-        },
+    },
+    {
+      // $project is used to hide the _id field
+      $project: {
+        _id: 0,
       },
-      {
-        $sort: {
-          numNFTStarts: -1,
-        },
+    },
+    {
+      $sort: {
+        numNFTStarts: -1,
       },
-      {
-        $limit: 10,
-      },
-    ]);
-    resp.status(200).json({
-      status: "success",
-      data: plan,
-    });
-  } catch (error) {
-    resp.status(500).json({
-      status: "fail",
-      message: "server error",
-    });
-  }
-};
+    },
+    {
+      $limit: 10,
+    },
+  ]);
+  resp.status(200).json({
+    status: "success",
+    data: plan,
+  });
+});
 
 // ********************************* NFT ENDPOINTS ****************************************
 
