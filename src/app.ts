@@ -1,11 +1,14 @@
+import path from "path";
 import morgan from "morgan";
 import express from "express";
-import path from "path";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
+import type { Express } from "express";
+import AppError from "./Utils/appError.js";
 import nftsRouter from "./routes/nftsRoute.js";
 import usersRouter from "./routes/usersRoute.js";
-import type { Express } from "express";
+import { Request, Response, NextFunction } from "express";
+import globalErrorHandler from "./controllers/errorControllers.js";
 
 const app: Express = express();
 
@@ -62,6 +65,18 @@ app.use((req, resp, next) => {
 // *** EXPRESS ROUTER MIDDLEWARE ***
 app.use("/api/v1/nfts", nftsRouter);
 app.use("/api/v1/users", usersRouter);
+
+//=========================================================================================
+// <- ERROR HANDLING ->
+//=========================================================================================
+
+// *** GLOBAL ERROR HANDLER ***
+app.get("*", (req: Request, res: Response, next: NextFunction) => {
+  const err = new AppError(`Can't find ${req.originalUrl} on this server`, 404);
+  next(err);
+});
+
+app.use(globalErrorHandler);
 
 //=========================================================================================
 // <- EXPORTS ->
