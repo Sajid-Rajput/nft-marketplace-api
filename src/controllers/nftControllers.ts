@@ -1,4 +1,5 @@
 import NFT from "../models/nftModel.js";
+import AppError from "../Utils/appError.js";
 import catchAsync from "../Utils/catchAsync.js";
 import APIFeatures from "../Utils/apiFeatures.js";
 import { Request, Response, NextFunction } from "express";
@@ -45,7 +46,7 @@ const aliasTopNFTs: (
 //=========================================================================================
 
 const getAllNFTs: (req: Request, resp: Response, next: NextFunction) => void =
-  catchAsync(async (req, resp) => {
+  catchAsync(async (req, resp, next) => {
     const features: APIFeatures = new APIFeatures(NFT.find(), req.query)
       .filter()
       .sort()
@@ -67,7 +68,7 @@ const getAllNFTs: (req: Request, resp: Response, next: NextFunction) => void =
 //=========================================================================================
 
 const createNFT: (req: Request, resp: Response, next: NextFunction) => void =
-  catchAsync(async (req, resp) => {
+  catchAsync(async (req, resp, next) => {
     const newNFT = await NFT.create(req.body);
 
     resp.status(201).json({
@@ -83,8 +84,12 @@ const createNFT: (req: Request, resp: Response, next: NextFunction) => void =
 //=========================================================================================
 
 const getSingleNFT: (req: Request, resp: Response, next: NextFunction) => void =
-  catchAsync(async (req, resp) => {
+  catchAsync(async (req, resp, next) => {
     const nft = await NFT.findById(req.params.id);
+
+    if (!nft) {
+      return next(new AppError("No NFT is found with that ID", 404));
+    }
 
     resp.status(200).json({
       status: "success",
@@ -99,11 +104,16 @@ const getSingleNFT: (req: Request, resp: Response, next: NextFunction) => void =
 //=========================================================================================
 
 const updateNFT: (req: Request, resp: Response, next: NextFunction) => void =
-  catchAsync(async (req, resp) => {
+  catchAsync(async (req, resp, next) => {
     const nft = await NFT.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
     });
+
+    if (!nft) {
+      return next(new AppError("No NFT is found with that ID", 404));
+    }
+
     resp.status(200).json({
       status: "success",
       data: {
@@ -117,9 +127,13 @@ const updateNFT: (req: Request, resp: Response, next: NextFunction) => void =
 //=========================================================================================
 
 const deleteNFT: (req: Request, resp: Response, next: NextFunction) => void =
-  catchAsync(async (req, resp) => {
-    await NFT.findByIdAndDelete(req.params.id);
-    console.log(typeof req.params.id);
+  catchAsync(async (req, resp, next) => {
+    const nft = await NFT.findByIdAndDelete(req.params.id);
+
+    if (!nft) {
+      return next(new AppError("No NFT is found with that ID", 404));
+    }
+
     resp.status(204).json({
       status: "success",
       data: null,
@@ -131,7 +145,7 @@ const deleteNFT: (req: Request, resp: Response, next: NextFunction) => void =
 //=========================================================================================
 
 const getNftsStats: (req: Request, resp: Response, next: NextFunction) => void =
-  catchAsync(async (req, resp) => {
+  catchAsync(async (req, resp, next) => {
     // *** Mongoose Aggregator Pipeline ***
     const stats = await NFT.aggregate([
       {
@@ -176,7 +190,7 @@ const getMonthlyPlan: (
   req: Request,
   resp: Response,
   next: NextFunction
-) => void = catchAsync(async (req, resp) => {
+) => void = catchAsync(async (req, resp, next) => {
   const year: number = +req.params.year;
   const plan = await NFT.aggregate([
     {
