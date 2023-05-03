@@ -1,6 +1,7 @@
 import express from "express";
 import type { Router } from "express";
 import userControllers from "../controllers/userControllers.js";
+import authControllers from "../controllers/authControllers.js";
 
 //=========================================================================================
 // <- ROUTER USERS ->
@@ -8,6 +9,9 @@ import userControllers from "../controllers/userControllers.js";
 
 // *** EXPRESS ROUTER ***
 const router: Router = express.Router();
+
+// *** SIGNUP ROUTE ***
+router.post("/signup", authControllers.signup);
 
 // *** USERS ROUTES ***
 
