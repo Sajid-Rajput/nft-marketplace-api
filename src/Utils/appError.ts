@@ -6,6 +6,11 @@ export default class AppError extends Error {
   public status: string;
   public statusCode: number;
   public isOperational: boolean;
+  path?: string;
+  value?: string;
+  code?: number;
+  keyValue?: { name: string };
+  errors?: { [s: string]: unknown; } | ArrayLike<unknown>;
 
   constructor(message: string, statusCode: number) {
     super(message);

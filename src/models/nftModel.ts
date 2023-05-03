@@ -48,7 +48,7 @@ const nftSchema = new mongoose.Schema(
       required: [true, "must have difficulty"],
       enum: {
         values: ["easy", "medium", "difficult"],
-        message: "Difficulty is either: easy, medium, and difficult.",
+        message: "Difficulty is either: easy, medium, and difficult",
       },
     },
     ratingsAverage: {

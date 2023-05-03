@@ -32,6 +32,7 @@ if (process.env.DATABASE && process.env.DATABASE_PASSWORD) {
     })
     .then(() => {
       console.log("DB Connected Successfully");
+      console.log(`Running Environment: ${process.env.NODE_ENV}`);
     });
 }
 
