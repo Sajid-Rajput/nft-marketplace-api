@@ -7,6 +7,16 @@ import app from "./app.js";
 import AppError from "./Utils/appError.js";
 
 //=========================================================================================
+// <- HANDLE UNCAUGHTEXCEPTION ERROR BY USING NODEJS EVENT LISTENER ->
+//=========================================================================================
+
+process.on("uncaughtException", (err) => {
+  console.log("UncaughtException! Shutting down the Application...");
+  console.log(err.name, err.message);
+  process.exit(1);
+});
+
+//=========================================================================================
 // <- CREATE ENVIRONMENT VARIBLE ->
 //=========================================================================================
 
