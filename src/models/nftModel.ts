@@ -1,6 +1,5 @@
 import mongoose, { Model } from "mongoose";
 import slugify from "../Utils/slugify.js";
-import validator from "validator";
 
 //=========================================================================================
 // <- QUERY EXECUTION TIME CALCULATION FUNCTION
