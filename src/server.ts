@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import app from "./app.js";
+import AppError from "./Utils/appError.js";
 
 //=========================================================================================
 // <- CREATE ENVIRONMENT VARIBLE ->
@@ -41,6 +42,18 @@ if (process.env.DATABASE && process.env.DATABASE_PASSWORD) {
 //=========================================================================================
 const port: string | 3000 = process.env.PORT || 3000;
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`App running on port ${port}....`);
+});
+
+//=========================================================================================
+// <- HANDLE UNHANDLEDREJECTRION ERROR BY USING NODEJS EVENT LISTENER ->
+//=========================================================================================
+
+process.on("unhandledRejection", (err: AppError) => {
+  console.log(err.name, err.message);
+  console.log("UnhandledRejection! Shutting down the Application...");
+  server.close(() => {
+    process.exit(1);
+  });
 });
