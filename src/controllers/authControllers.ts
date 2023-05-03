@@ -8,7 +8,12 @@ import { Request, Response, NextFunction } from "express";
 
 const signup: (req: Request, resp: Response, next: NextFunction) => void =
   catchAsync(async (req, resp, next) => {
-    const newUser = await USER.create(req.body);
+    const newUser = await USER.create({
+      name: req.body.name,
+      email: req.body.email,
+      password: req.body.password,
+      passwordConfirm: req.body.passwordConfirm,
+    });
 
     resp.status(201).json({
       status: "Success",
