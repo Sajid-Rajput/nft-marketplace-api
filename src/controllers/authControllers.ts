@@ -1,5 +1,7 @@
 import USER from "../models/userModel.js";
 import catchAsync from "../Utils/catchAsync.js";
+import jwt from "jsonwebtoken";
+
 import { Request, Response, NextFunction } from "express";
 
 //=========================================================================================
@@ -15,8 +17,17 @@ const signup: (req: Request, resp: Response, next: NextFunction) => void =
       passwordConfirm: req.body.passwordConfirm,
     });
 
+    const token = jwt.sign(
+      { id: newUser._id },
+      process.env.JWT_SECRET || "default-secret",
+      {
+        expiresIn: process.env.JWT_EXPIRES_IN,
+      }
+    );
+
     resp.status(201).json({
       status: "Success",
+      token,
       data: {
         user: newUser,
       },
