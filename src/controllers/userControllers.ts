@@ -1,5 +1,6 @@
-import type { Request } from "express";
-import type { Response } from "express";
+import USER from "../models/userModel.js";
+import catchAsync from "../Utils/catchAsync.js";
+import type { Request, Response, NextFunction } from "express";
 
 // ********************************* USER ENDPOINTS ******************************************
 
@@ -7,12 +8,18 @@ import type { Response } from "express";
 // <- GET ALL USERS ->
 //=========================================================================================
 
-const getAllUsers: (req: Request, resp: Response) => void = (req, resp) => {
-  resp.status(500).json({
-    status: "error",
-    message: "Internal server error",
+const getAllUsers: (req: Request, resp: Response, next: NextFunction) => void =
+  catchAsync(async (req, resp) => {
+    const users = await USER.find();
+
+    resp.status(200).json({
+      status: "success",
+      results: users.length,
+      data: {
+        users,
+      },
+    });
   });
-};
 
 //=========================================================================================
 // <- CREATE USER ->

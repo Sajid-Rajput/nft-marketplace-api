@@ -13,6 +13,9 @@ const router: Router = express.Router();
 // *** SIGNUP ROUTE ***
 router.post("/signup", authControllers.signup);
 
+// *** LOGIN ROUTE ***
+router.post("/login", authControllers.login);
+
 // *** USERS ROUTES ***
 
 router
