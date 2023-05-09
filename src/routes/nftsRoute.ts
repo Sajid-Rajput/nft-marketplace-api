@@ -28,7 +28,11 @@ router
   .route("/:id")
   .get(nftControllers.getSingleNFT)
   .patch(nftControllers.updateNFT)
-  .delete(nftControllers.deleteNFT);
+  .delete(
+    authControllers.protect,
+    authControllers.restrictTo("admin", "guide"),
+    nftControllers.deleteNFT
+  );
 
 //=========================================================================================
 // <- EXPORTS ->

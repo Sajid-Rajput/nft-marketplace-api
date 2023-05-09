@@ -10,6 +10,7 @@ interface UserDocument extends Document {
   name: string;
   email: string;
   photo?: string;
+  role: string;
   password: string;
   passwordConfirm: string;
   passwordChangedAt?: Date;
@@ -33,6 +34,11 @@ const userSchema = new mongoose.Schema<UserDocument>({
     validate: [validator.isEmail, "Please Provide a valid email address"],
   },
   photo: String,
+  role: {
+    type: String,
+    enum: ["user", "creater", "admin", "guide"],
+    default: "user",
+  },
   password: {
     type: String,
     required: [true, "Please provide a password"],

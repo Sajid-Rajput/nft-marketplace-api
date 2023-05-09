@@ -6,6 +6,29 @@ import catchAsync from "../Utils/catchAsync.js";
 import { Request, Response, NextFunction } from "express";
 
 //=========================================================================================
+// <- EXTEND REQUEST OBJECT FOR RESTRICT TO CONTROLLER ->
+//=========================================================================================
+
+interface UserDocument extends Document {
+  name: string;
+  email: string;
+  photo?: string;
+  role: string;
+  password: string;
+  passwordConfirm: string;
+  passwordChangedAt?: Date;
+  correctPassword(
+    candidatePassword: string,
+    userPassword: string
+  ): Promise<boolean>;
+  changedPasswordAfter(JWTTimeStamp: number): boolean;
+}
+
+interface AuthenticatedRequest extends Request {
+  user?: UserDocument;
+}
+
+//=========================================================================================
 // <- DECODED-TOKEN INTERFACE ->
 //=========================================================================================
 interface DecodedToken {
@@ -147,6 +170,20 @@ const protect: (req: Request, resp: Response, next: NextFunction) => void =
   });
 
 //=========================================================================================
+// <- CHECK THE USER ROLE ->
+//=========================================================================================
+
+const restrictTo = (...roles: string[]) => {
+  return (req: AuthenticatedRequest, resp: Response, next: NextFunction) => {
+    console.log("Hello World");
+    console.log(req.user);
+    if (!req.user || !roles.includes(req.user.role)) {
+      return next(new AppError("You have no acces to delete NFT", 403));
+    }
+    next();
+  };
+};
+//=========================================================================================
 // <- EXPORTS ->
 //=========================================================================================
 
@@ -154,4 +191,5 @@ export default {
   signup,
   login,
   protect,
+  restrictTo,
 };
