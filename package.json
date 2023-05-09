@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "SET NODE_ENV=development&nodemon .\\lib\\server.js",
-    "start:prod": "SET NODE_ENV=production&nodemon .\\lib\\server.js",
+    "prod": "SET NODE_ENV=production&nodemon .\\lib\\server.js",
     "debug": "ndb .\\lib\\server.js"
   },
   "type": "module",

@@ -6,6 +6,15 @@ import catchAsync from "../Utils/catchAsync.js";
 import { Request, Response, NextFunction } from "express";
 
 //=========================================================================================
+// <- DECODED-TOKEN INTERFACE ->
+//=========================================================================================
+interface DecodedToken {
+  id: string;
+  iat: number;
+  exp: number;
+}
+
+//=========================================================================================
 // <- USERDOCUMENT INTERFACE FOR LOGIN CONTROLLER ->
 //=========================================================================================
 
@@ -36,12 +45,13 @@ const signToken = (id: string) => {
 
 const signup: (req: Request, resp: Response, next: NextFunction) => void =
   catchAsync(async (req, resp, next) => {
-    const newUser = await USER.create({
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password,
-      passwordConfirm: req.body.passwordConfirm,
-    });
+    const newUser = await USER.create(req.body);
+    // const newUser = await USER.create({
+    //   name: req.body.name,
+    //   email: req.body.email,
+    //   password: req.body.password,
+    //   passwordConfirm: req.body.passwordConfirm,
+    // });
 
     const token = signToken(newUser._id);
 
@@ -81,10 +91,67 @@ const login: (req: Request, resp: Response, next: NextFunction) => void =
   });
 
 //=========================================================================================
+// <- PROTECTING DATA ->
+//=========================================================================================
+
+const protect: (req: Request, resp: Response, next: NextFunction) => void =
+  catchAsync(async (req, resp, next) => {
+    // <- *** CHECK TOKEN *** ->
+    let token: string = "";
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+
+    if (!token) {
+      return next(new AppError("You are not logged in to get access", 401));
+    }
+
+    // <- *** VALIDATING TOKEN *** ->
+    const verifyToken = (token: string, secret: string) =>
+      new Promise((resolve, reject) => {
+        jwt.verify(token, secret, (err, decoded) => {
+          if (err) reject(err);
+          resolve(decoded);
+        });
+      });
+
+    const decode = (await verifyToken(
+      token,
+      process.env.JWT_SECRET || "default-secret"
+    )) as DecodedToken;
+
+    // <- *** USER EXIST *** ->
+    const currentUser = await USER.findById({ _id: decode.id });
+
+    if (!currentUser) {
+      return next(
+        new AppError(
+          "The user belonging to this token is no longer exists.",
+          401
+        )
+      );
+    }
+
+    // <- *** CHANGE PASSWORD *** ->
+    if (currentUser.changedPasswordAfter(decode.iat)) {
+      return next(new AppError("User recently changed the password.", 401));
+    }
+
+    // <- *** USER WILL HAVA ACCESS THE PROTECTING DATA *** ->
+    req.user = currentUser;
+
+    next();
+  });
+
+//=========================================================================================
 // <- EXPORTS ->
 //=========================================================================================
 
 export default {
   signup,
   login,
+  protect,
 };

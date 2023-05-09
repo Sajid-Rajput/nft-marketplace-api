@@ -1,6 +1,7 @@
 import express from "express";
 import type { Router } from "express";
 import nftControllers from "../controllers/nftControllers.js";
+import authControllers from "../controllers/authControllers.js";
 
 //=========================================================================================
 // <- ROUTER NFTs ->
@@ -18,7 +19,10 @@ router.route("/nfts-stats").get(nftControllers.getNftsStats);
 
 router.route("/monthly-plan/:year").get(nftControllers.getMonthlyPlan);
 
-router.route("/").get(nftControllers.getAllNFTs).post(nftControllers.createNFT);
+router
+  .route("/")
+  .get(authControllers.protect, nftControllers.getAllNFTs)
+  .post(nftControllers.createNFT);
 
 router
   .route("/:id")

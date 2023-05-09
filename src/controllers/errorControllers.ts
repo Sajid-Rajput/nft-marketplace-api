@@ -57,6 +57,18 @@ function handleValidationError(err: AppError): AppError {
   return new AppError(message, 400);
 }
 
+// <- JWT(JSON-WEB-TOKEN) ERROR FUNCTION ->
+function handleJWTError(): AppError {
+  const message = "Invalid token, Please log in again";
+  return new AppError(message, 401);
+}
+
+// <- JWT(JSON-WEB-TOKEN) EXPIRED ERROR FUNCTION ->
+function handleJWTExpiredError(): AppError {
+  const message = "Your token got expired. Please login again";
+  return new AppError(message, 401);
+}
+
 const globalErrorHandler = (
   err: AppError,
   req: Request,
@@ -77,6 +89,10 @@ const globalErrorHandler = (
       error = handleDuplicateFieldsDB(error);
     } else if (err.name === "ValidationError") {
       error = handleValidationError(error);
+    } else if (err.name === "JsonWebTokenError") {
+      error = handleJWTError();
+    } else if (err.name === "TokenExpiredError") {
+      error = handleJWTExpiredError();
     }
 
     sendErrorPro(error, resp);
