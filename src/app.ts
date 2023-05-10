@@ -1,5 +1,6 @@
 import path from "path";
 import morgan from "morgan";
+import helmet from "helmet";
 import express from "express";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
@@ -33,6 +34,12 @@ app.use(express.json({ limit: "10kb" })); // <- Express Middleware ->
 
 //=========================================================================================
 // <- SECURE HTTP HEADER USING HELMET ->
+//=========================================================================================
+
+app.use(helmet());
+
+//=========================================================================================
+// <- MORGAN PACKAGE FOR SEE API CALLS IN TERMINAL ->
 //=========================================================================================
 
 if (process.env.NODE_ENV === "development") {
