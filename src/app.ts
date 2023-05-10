@@ -3,12 +3,14 @@ import morgan from "morgan";
 import helmet from "helmet";
 import express from "express";
 import { dirname } from "path";
+import xssClean from "xxs-clean";
 import { fileURLToPath } from "url";
 import type { Express } from "express";
 import AppError from "./Utils/appError.js";
 import { rateLimit } from "express-rate-limit";
 import nftsRouter from "./routes/nftsRoute.js";
 import usersRouter from "./routes/usersRoute.js";
+import ExpressMongoSanitize from "express-mongo-sanitize";
 import { Request, Response, NextFunction } from "express";
 import globalErrorHandler from "./controllers/errorControllers.js";
 
@@ -31,6 +33,18 @@ app.use("/api", limiter);
 //=========================================================================================
 
 app.use(express.json({ limit: "10kb" })); // <- Express Middleware ->
+
+//=========================================================================================
+// <- DATA SANITIZATION AGAINST NOSQL QUERY INJECTION ->
+//=========================================================================================
+
+app.use(ExpressMongoSanitize());
+
+//=========================================================================================
+// <- DATA SANITIZATION AGAINST SITE SCRIPT XSS ->
+//=========================================================================================
+
+app.use(xssClean());
 
 //=========================================================================================
 // <- SECURE HTTP HEADER USING HELMET ->
