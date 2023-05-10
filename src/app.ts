@@ -3,7 +3,7 @@ import morgan from "morgan";
 import helmet from "helmet";
 import express from "express";
 import { dirname } from "path";
-import xssClean from "xxs-clean";
+import xssClean from "xss-clean";
 import { fileURLToPath } from "url";
 import type { Express } from "express";
 import AppError from "./Utils/appError.js";
