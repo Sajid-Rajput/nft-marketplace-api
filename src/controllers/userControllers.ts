@@ -1,6 +1,7 @@
 import USER from "../models/userModel.js";
 import AppError from "../Utils/appError.js";
 import catchAsync from "../Utils/catchAsync.js";
+import APIFeatures from "../Utils/apiFeatures.js";
 import type { Request, Response, NextFunction } from "express";
 
 // ********************************* USER ENDPOINTS ****************************************
@@ -73,7 +74,13 @@ const deleteMe: (req: Request, resp: Response, next: NextFunction) => void =
 
 const getAllUsers: (req: Request, resp: Response, next: NextFunction) => void =
   catchAsync(async (req, resp) => {
-    const users = await USER.find();
+    const userFeatures: APIFeatures = new APIFeatures(USER.find(), req.query)
+      .filter()
+      .sort()
+      .limitfields()
+      .pagination();
+
+    const users = await userFeatures["query"];
 
     resp.status(200).json({
       status: "success",

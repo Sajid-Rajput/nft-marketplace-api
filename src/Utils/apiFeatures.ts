@@ -1,6 +1,5 @@
 import { Document, Query } from "mongoose";
 import { Request } from "express";
-import { log } from "console";
 
 export default class APIFeatures {
   private query: Query<Document[], Document>;

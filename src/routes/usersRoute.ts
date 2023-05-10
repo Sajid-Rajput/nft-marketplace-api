@@ -39,14 +39,34 @@ router.delete("/deleteMe", authControllers.protect, userControllers.deleteMe);
 
 router
   .route("/")
-  .get(userControllers.getAllUsers)
-  .post(userControllers.createUser);
+  .get(
+    authControllers.protect,
+    authControllers.restrictTo("admin", "guide"),
+    userControllers.getAllUsers
+  )
+  .post(
+    authControllers.protect,
+    authControllers.restrictTo("admin", "guide"),
+    userControllers.createUser
+  );
 
 router
   .route("/:id")
-  .get(userControllers.getSingleUser)
-  .patch(userControllers.updateUser)
-  .delete(userControllers.deleteUser);
+  .get(
+    authControllers.protect,
+    authControllers.restrictTo("admin", "guide"),
+    userControllers.getSingleUser
+  )
+  .patch(
+    authControllers.protect,
+    authControllers.restrictTo("admin", "guide"),
+    userControllers.updateUser
+  )
+  .delete(
+    authControllers.protect,
+    authControllers.restrictTo("admin", "guide"),
+    userControllers.deleteUser
+  );
 
 //=========================================================================================
 // <- EXPORTS ->
