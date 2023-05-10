@@ -1,8 +1,56 @@
 import USER from "../models/userModel.js";
+import AppError from "../Utils/appError.js";
 import catchAsync from "../Utils/catchAsync.js";
 import type { Request, Response, NextFunction } from "express";
 
-// ********************************* USER ENDPOINTS ******************************************
+// ********************************* USER ENDPOINTS ****************************************
+
+//=========================================================================================
+// <- FILTER OBJECT FUNCTION ->
+//=========================================================================================
+
+const filterObj = (obj: Request["body"], ...allowedFields: string[]) => {
+  const newObj: { [key: string]: any } = {};
+  Object.keys(obj).forEach((element) => {
+    if (allowedFields.includes(element)) {
+      newObj[element] = obj[element];
+    }
+  });
+
+  return newObj;
+};
+
+//=========================================================================================
+// <- UPDATE CURRENT USER DATA ->
+//=========================================================================================
+
+const updateMe: (req: Request, resp: Response, next: NextFunction) => void =
+  catchAsync(async (req, resp, next) => {
+    // <- *** CREATE ERROR IF USER UPDATING PASSWORD *** ->
+    if (req.body.password || req.body.passwordConfirm) {
+      return next(
+        new AppError(
+          "This route is for password update. Please use /updateMyPassword",
+          400
+        )
+      );
+    }
+
+    // <- *** UPDATE USER DATA *** ->
+    const filteredBody = filterObj(req.body, "name", "email");
+
+    const updateUser = await USER.findByIdAndUpdate(req.user.id, filteredBody, {
+      new: true,
+      runValidators: true,
+    });
+
+    resp.status(200).json({
+      status: "success",
+      data: {
+        user: updateUser,
+      },
+    });
+  });
 
 //=========================================================================================
 // <- GET ALL USERS ->
@@ -65,7 +113,7 @@ const deleteUser: (req: Request, resp: Response) => void = (req, resp) => {
   });
 };
 
-// ********************************* USER ENDPOINTS ******************************************
+// ********************************* USER ENDPOINTS ****************************************
 
 //=========================================================================================
 // <- EXPORTS ->
@@ -77,4 +125,5 @@ export default {
   getSingleUser,
   updateUser,
   deleteUser,
+  updateMe,
 };

@@ -2,13 +2,12 @@ import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import mongoose, { Document } from "mongoose";
 import validator from "../Utils/validator.js";
-import { NextFunction } from "express";
 
 //=========================================================================================
 // <- CREATE USER MODEL MONGOOSE SCHEMA ->
 //=========================================================================================
 
-interface UserDocument extends Document {
+export interface UserDocument extends Document {
   name: string;
   email: string;
   photo?: string;

@@ -1,33 +1,15 @@
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
-import { Document } from "mongoose";
 import sendEmail from "../Utils/mail.js";
 import USER from "../models/userModel.js";
 import AppError from "../Utils/appError.js";
 import catchAsync from "../Utils/catchAsync.js";
+import { UserDocument } from "../models/userModel.js";
 import { Request, Response, NextFunction } from "express";
 
 //=========================================================================================
 // <- EXTEND REQUEST OBJECT FOR RESTRICT TO CONTROLLER ->
 //=========================================================================================
-
-interface UserDocument extends Document {
-  name: string;
-  email: string;
-  photo?: string;
-  role: string;
-  password: string;
-  passwordConfirm: string;
-  passwordChangedAt?: Date;
-  passwordResetToken?: String;
-  passwordResetExpires?: Date;
-  correctPassword(
-    candidatePassword: string,
-    userPassword: string
-  ): Promise<boolean>;
-  changedPasswordAfter(JWTTimeStamp: number): boolean;
-  createPasswordResetToken(): void;
-}
 
 interface AuthenticatedRequest extends Request {
   user?: UserDocument;

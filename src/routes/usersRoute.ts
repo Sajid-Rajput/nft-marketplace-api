@@ -29,6 +29,9 @@ router.patch(
   authControllers.updatePassword
 );
 
+// *** UPDATE CURRENT USER DATA ROUTE ***
+router.patch("/updateMe", authControllers.protect, userControllers.updateMe);
+
 // *** USERS ROUTES ***
 
 router
