@@ -53,6 +53,21 @@ const updateMe: (req: Request, resp: Response, next: NextFunction) => void =
   });
 
 //=========================================================================================
+// <- CURRENT USER DELETE THE ACCOUNT ->
+//=========================================================================================
+
+const deleteMe: (req: Request, resp: Response, next: NextFunction) => void =
+  catchAsync(async (req, resp, next) => {
+    console.log(req);
+    await USER.findByIdAndUpdate(req.user._id, { active: false });
+
+    resp.status(204).json({
+      status: "success",
+      data: null,
+    });
+  });
+
+//=========================================================================================
 // <- GET ALL USERS ->
 //=========================================================================================
 
@@ -126,4 +141,5 @@ export default {
   updateUser,
   deleteUser,
   updateMe,
+  deleteMe,
 };

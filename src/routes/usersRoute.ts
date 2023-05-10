@@ -32,6 +32,9 @@ router.patch(
 // *** UPDATE CURRENT USER DATA ROUTE ***
 router.patch("/updateMe", authControllers.protect, userControllers.updateMe);
 
+// *** CURRENT USER DELETE ACCOUNT ***
+router.delete("/deleteMe", authControllers.protect, userControllers.deleteMe);
+
 // *** USERS ROUTES ***
 
 router

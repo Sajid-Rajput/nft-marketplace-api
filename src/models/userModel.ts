@@ -17,12 +17,19 @@ export interface UserDocument extends Document {
   passwordChangedAt?: Date;
   passwordResetToken?: String;
   passwordResetExpires?: number;
+  active: Boolean;
   correctPassword(
     candidatePassword: string,
     userPassword: string
   ): Promise<boolean>;
   changedPasswordAfter(JWTTimeStamp: number): boolean;
   createPasswordResetToken(): void;
+  find(
+    conditions?: any,
+    projection?: any,
+    options?: any,
+    callback?: (err: any, res: any) => void
+  ): mongoose.Query<any[], UserDocument>;
 }
 
 const userSchema = new mongoose.Schema<UserDocument>({
@@ -65,6 +72,21 @@ const userSchema = new mongoose.Schema<UserDocument>({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
+});
+
+//=========================================================================================
+// <- HIDE INACTIVE USERS ->
+//=========================================================================================
+
+userSchema.pre<UserDocument>(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
+
+  next();
 });
 
 //=========================================================================================

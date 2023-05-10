@@ -67,7 +67,7 @@ const signup: (req: Request, resp: Response, next: NextFunction) => void =
     //   passwordConfirm: req.body.passwordConfirm,
     // });
 
-    createSendToken(newUser._id, 201, resp);
+    createSendToken(newUser, 201, resp);
   });
 
 //=========================================================================================
@@ -89,7 +89,7 @@ const login: (req: Request, resp: Response, next: NextFunction) => void =
     if (!user || !(await user.correctPassword(password, user.password))) {
       return next(new AppError("Incorrect email and password", 401));
     }
-    createSendToken(user._id, 200, resp);
+    createSendToken(user, 200, resp);
   });
 
 //=========================================================================================
@@ -247,7 +247,7 @@ const resetPassword: (
   await user.save();
 
   // <- *** LOG THE USER IN AND SEND JWT *** ->
-  createSendToken(user._id, 200, resp);
+  createSendToken(user, 200, resp);
 });
 
 //=========================================================================================
@@ -276,7 +276,7 @@ const updatePassword: (
     await user.save();
 
     // <- *** LOG USER AFTER PASSWORD CHANGE *** ->
-    createSendToken(user._id, 200, resp);
+    createSendToken(user, 200, resp);
   }
 });
 
