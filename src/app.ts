@@ -5,6 +5,7 @@ import { dirname } from "path";
 import { fileURLToPath } from "url";
 import type { Express } from "express";
 import AppError from "./Utils/appError.js";
+import { rateLimit } from "express-rate-limit";
 import nftsRouter from "./routes/nftsRoute.js";
 import usersRouter from "./routes/usersRoute.js";
 import { Request, Response, NextFunction } from "express";
@@ -13,10 +14,26 @@ import globalErrorHandler from "./controllers/errorControllers.js";
 const app: Express = express();
 
 //=========================================================================================
+// <- EXPRESS MIDDLEWARE(SET CALL API RATE LIMIT TO A SPECIFIC IP ) ->
+//=========================================================================================
+
+const limiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: "Too many request from this IP, please try again in an hous",
+});
+
+app.use("/api", limiter);
+
+//=========================================================================================
 // <- EXPRESS MIDDLEWARE ->
 //=========================================================================================
 
-app.use(express.json()); // <- Express Middleware ->
+app.use(express.json({ limit: "10kb" })); // <- Express Middleware ->
+
+//=========================================================================================
+// <- SECURE HTTP HEADER USING HELMET ->
+//=========================================================================================
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
