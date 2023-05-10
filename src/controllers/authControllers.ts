@@ -29,9 +29,11 @@ interface DecodedToken {
 //=========================================================================================
 
 const signToken = (id: string) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || "default-secret", {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  });
+  if (process.env.JWT_SECRET) {
+    return jwt.sign({ id }, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRES_IN,
+    });
+  }
 };
 
 //=========================================================================================
@@ -43,12 +45,32 @@ const createSendToken = (
   statusCode: number,
   resp: Response
 ) => {
+  const { password, ...userWithoutPassword } = user.toObject();
   const token = signToken(user._id);
+
+  const cookieOptions: {
+    expires: Date;
+    httpOnly: boolean;
+    secure?: boolean;
+  } = {
+    expires: new Date(
+      Date.now() +
+        Number(process.env.JWT_COOKIE_EXPIRE_IN) * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  };
+
+  if (process.env.NODE_ENV === "production") {
+    cookieOptions.secure = true;
+  }
+
+  resp.cookie("jwt", token, cookieOptions);
+
   resp.status(statusCode).json({
     status: "success",
     token,
     data: {
-      user,
+      user: userWithoutPassword,
     },
   });
 };
