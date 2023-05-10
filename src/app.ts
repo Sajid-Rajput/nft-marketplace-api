@@ -1,3 +1,4 @@
+import hpp from "hpp";
 import path from "path";
 import morgan from "morgan";
 import helmet from "helmet";
@@ -45,6 +46,23 @@ app.use(ExpressMongoSanitize());
 //=========================================================================================
 
 app.use(xssClean());
+
+//=========================================================================================
+// <- PREVENT PARAMETER POPULATION ->
+//=========================================================================================
+
+app.use(
+  hpp({
+    whitelist: [
+      "duration",
+      "difficulty",
+      "maxGroupSize",
+      "price",
+      "ratingsAverage",
+      "ratingsQuantity",
+    ],
+  })
+);
 
 //=========================================================================================
 // <- SECURE HTTP HEADER USING HELMET ->
