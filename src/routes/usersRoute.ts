@@ -16,6 +16,19 @@ router.post("/signup", authControllers.signup);
 // *** LOGIN ROUTE ***
 router.post("/login", authControllers.login);
 
+// *** FORGOT PASSWAORD ROUTE ***
+router.post("/forgotPassword", authControllers.forgotPassword);
+
+// *** RESET PASSWORD ROUTE ***
+router.patch("/resetPassword/:token", authControllers.resetPassword);
+
+// *** RESET PASSWORD ROUTE ***
+router.patch(
+  "/updateMyPassword",
+  authControllers.protect,
+  authControllers.updatePassword
+);
+
 // *** USERS ROUTES ***
 
 router

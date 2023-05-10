@@ -27,3 +27,7 @@ The catchAsync function returns a new function that takes three arguments: req, 
 If the Promise returned by myFunc is rejected, the catch method is called with next as its argument. next is a function that invokes the next middleware function in the application's middleware stack. By passing next to catch, any errors thrown in the Promise chain will be passed down to the error-handling middleware, allowing for centralized error handling.
 
 In summary, the catchAsync function is a utility function that takes a function that returns a Promise and returns a new function that handles errors in that Promise by passing them down to the error-handling middleware.
+
+7. The method first uses the crypto module, which is a built-in Node.js module that provides cryptographic functionality, to generate a random sequence of bytes using the randomBytes() function. The argument 32 specifies the number of bytes to generate, which is then converted to a hexadecimal string using the toString() method.
+
+The next line creates a hash of the resetToken using the SHA-256 algorithm by calling crypto.createHash("sha256").update(resetToken).digest("hex"). The createHash() method creates a hash object using the specified algorithm, which is then updated with the resetToken string using the update() method, and finally, the digest() method is called with "hex" as an argument to return the hash value as a hexadecimal string.

@@ -1,6 +1,8 @@
+import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import mongoose, { Document } from "mongoose";
 import validator from "../Utils/validator.js";
+import { NextFunction } from "express";
 
 //=========================================================================================
 // <- CREATE USER MODEL MONGOOSE SCHEMA ->
@@ -14,11 +16,14 @@ interface UserDocument extends Document {
   password: string;
   passwordConfirm: string;
   passwordChangedAt?: Date;
+  passwordResetToken?: String;
+  passwordResetExpires?: number;
   correctPassword(
     candidatePassword: string,
     userPassword: string
   ): Promise<boolean>;
   changedPasswordAfter(JWTTimeStamp: number): boolean;
+  createPasswordResetToken(): void;
 }
 
 const userSchema = new mongoose.Schema<UserDocument>({
@@ -59,6 +64,19 @@ const userSchema = new mongoose.Schema<UserDocument>({
     },
   },
   passwordChangedAt: Date,
+  passwordResetToken: String,
+  passwordResetExpires: Date,
+});
+
+//=========================================================================================
+// <- ENCRYPT PASSWORD USING BCRYPT ->
+//=========================================================================================
+
+userSchema.pre<UserDocument>("save", function (next) {
+  if (!this.isModified("password") || this.isNew) return next();
+
+  this.passwordChangedAt = new Date(Date.now() - 1000);
+  next();
 });
 
 //=========================================================================================
@@ -112,6 +130,25 @@ userSchema.methods.changedPasswordAfter = function (
     return JWTTimeStamp < changedTimeStamp;
   }
   return false;
+};
+
+//=========================================================================================
+// <- CREATE RANDOM TOKEN FOR CHANGING PASSWORD ->
+//=========================================================================================
+
+userSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  const now = new Date();
+  const tenMinutesLater = now.getTime() + 10 * 60 * 1000;
+  this.passwordResetExpires = tenMinutesLater;
+
+  return resetToken;
 };
 
 const USER = mongoose.model<UserDocument>("User", userSchema);
